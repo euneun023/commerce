@@ -1,5 +1,5 @@
 #=== build stage === 
-FROM openjdk:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /workspace
 
@@ -29,7 +29,7 @@ RUN ./gradlew bootJar --no-daemon
 
 
 #=== run stage ===
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 EXPOSE 8088
