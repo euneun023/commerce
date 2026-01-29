@@ -15,8 +15,6 @@ public class HealthController {
         this.dbCheckService = dbCheckService;
     }
     
-        
-
     @GetMapping("/healthz")
     public String healthCheck() {
         return "200 OK";
@@ -24,5 +22,9 @@ public class HealthController {
     @GetMapping("/dbz")
     public String dbCheck() {
         return "DB OK, product count: " + dbCheckService.productCount();
+    }
+    @GetMapping("/status")
+    public String statusCheck() {
+        return "live";
     }
 }
