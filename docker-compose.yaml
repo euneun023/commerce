@@ -1,0 +1,36 @@
+version: '3.8'	#컴포즈 파일 규격 버전
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb_container
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:	#환경변수, 자동생성
+      MYSQL_ROOT_PASSWORD: "2188"
+      MYSQL_DATABASE: "commerce"
+    volumes:		#(로컬:도커)
+      - ./db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - commerce-net
+
+  app-commerce:
+    build: .
+    image: commerce-api	#생략가능
+    container_name: commerce_container
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment: 
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/commerce
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "2188"
+    depends_on:
+      - mariadb
+    networks:
+      - commerce-net
+
+networks:
+  commerce-net:   #네트워크 이름 정의
+    driver: bridge    #기본값. 가상네트워크 (가상공유기) 
