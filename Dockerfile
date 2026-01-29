@@ -32,7 +32,7 @@ RUN ./gradlew bootJar --no-daemon
 FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
-EXPOSE 8088
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar"]
 CMD ["commerce.jar"]
 
