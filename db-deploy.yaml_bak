@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: db-deploy
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: mariadb 
+        image: mariadb:10.6
+        env:
+        - name: MARIADB_DATABASE
+          value: "commerce"
+        - name: MARIADB_ROOT_PASSWORD
+          value: "admin123"
+        ports:
+          - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb #api-deploy의 url "jdbc:mariadb://mariadb:3306/commerce" 
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+
+
