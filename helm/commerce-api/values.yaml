@@ -1,0 +1,73 @@
+
+api:
+  replicaCount: 1
+  image:
+    repository: api-server
+    pullPolicy: Never
+
+  containerPort: 8080    
+
+  env:
+    datasource:
+      host: mariadb
+      url: jdbc:mariadb://mariadb:3306/commerce
+      username: root
+      password: admin123
+      database: commerce
+      port: 3306
+
+  probes:
+    path: /healthz
+    port: 8080
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 5
+
+  service:
+    name: api-svc
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+#mariadb
+mariadb:
+  replicaCount: 1
+  enabled: true
+
+  image:
+    repository: mariadb
+    tag: "10.6"
+
+  containerPort: 3306
+
+  env:
+    datasource:
+      database: commerce
+      rootPassword: admin123
+
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessModes: 
+      - ReadWriteOnce
+
+  service:
+    name: mariadb
+    protocol: TCP
+    port: 3306
+    targetPort: 3306
+
+ingress:
+  enabled: true
+  name: commerce-ingress
+  host: commerce.com
+  path: / 
+  pathType: Prefix
+  
+  backendServiceName: api-svc
+  backendServicePort: 8080  
+
