@@ -1,0 +1,20 @@
+api:
+  replicaCount: 1
+  image:
+    repository: real/api-server
+    pullPolicy: IfNotPresent
+  env:
+    datasource:
+      host: mariadb
+      username: realUser
+      password: admin12345
+      database: commerce
+
+mariadb:
+  enabled: false # RDS 등 사용
+  env:
+    datasource:
+      rootPassword: admin12345
+ingress:
+  enabled: true
+  host: commerce.com

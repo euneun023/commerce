@@ -1,0 +1,19 @@
+api:
+  replicaCount: 1
+  image:
+    repository: api-server
+    pullPolicy: Never
+  env:
+    datasource:
+      host: mariadb
+      username: root
+      password: admin123
+      database: commerce
+
+mariadb:
+  enabled: true
+  env:
+    datasource:
+      rootPassword: admin123
+ingress:
+  enabled: false
