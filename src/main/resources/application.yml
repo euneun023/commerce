@@ -4,14 +4,16 @@ spring:
 
     datasource:
         url: jdbc:mariadb://mariadb:3306/commerce
+      #url: jdbc:mariadb://commerce-mariadb:3306/commerce
         username: root
         password: admin123
         driver-class-name: org.mariadb.jdbc.Driver
 
     jpa:
+        show-sql: true
         hibernate:
             ddl-auto: update
-            show-sql: true
-            format-sql: true
         properties:
-            hibernate.dialect: org.hibernate.dialect.MariaDBDialect 
+            hibernate:
+              format-sql: true
+              dialect: org.hibernate.dialect.MariaDBDialect 
