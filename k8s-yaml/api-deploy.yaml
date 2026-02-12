@@ -20,13 +20,11 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Never
-        env:
-          - name: SPRING_DATASOURCE_URL
-            value: "jdbc:mariadb://mariadb:3306/commerce"
-          - name: SPRING_DATASOURCE_USERNAME
-            value: "root"
-          - name: SPRING_DATASOURCE_PASSWORD
-            value: "admin123"
+        envFrom:
+          - configMapRef:
+              name: api-config
+          - secretRef:
+              name: api-secret
         livenessProbe:
           httpGet:
             path: /healthz
