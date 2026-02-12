@@ -35,22 +35,37 @@ api:
 
 #mariadb
 mariadb:
-  fullnameOverride: "mariadb"
-  architecture: standalone
+  replicaCount: 1
+  enabled: true
 
-  auth:
-    database: commerce
-    rootPassword: "admin123"
+  image:
+    repository: mariadb
+    tag: "10.6"
 
-  primary:
-    persistence:
-      size: 1Gi
+  containerPort: 3306
+
+  env:
+    datasource:
+      database: commerce
+      rootPassword: admin123
+
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessModes: 
+      - ReadWriteOnce
+
+  service:
+    name: mariadb
+    protocol: TCP
+    port: 3306
+    targetPort: 3306
 
 ingress:
   enabled: true
   name: commerce-ingress
-  path: / 
   host: commerce.com
+  path: / 
   pathType: Prefix
   
   backendServiceName: api-svc
