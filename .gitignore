@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+# Terraform 설정 및 바이너리 제외
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+**/.terraform/
