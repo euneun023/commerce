@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: mariadb
+spec: 
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb 
+        image: mariadb:10.6
+        env:
+        - name: MARIADB_DATABASE
+          value: "commerce"
+        - name: MARIADB_ROOT_PASSWORD
+          value: "admin123"
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+        - name: mariadb-data
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mariadb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb #api-deploy의 url "jdbc:mariadb://mariadb:3306/commerce" 
+spec:
+  selector:
+    app: mariadb
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+
+

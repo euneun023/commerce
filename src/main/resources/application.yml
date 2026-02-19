@@ -1,0 +1,19 @@
+spring:
+    application:
+        name: commerce
+
+    datasource:
+        url: jdbc:mariadb://mariadb:3306/commerce
+      #url: jdbc:mariadb://commerce-mariadb:3306/commerce
+        username: root
+        password: admin123
+        driver-class-name: org.mariadb.jdbc.Driver
+
+    jpa:
+        show-sql: true
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+              format-sql: true
+              dialect: org.hibernate.dialect.MariaDBDialect 
