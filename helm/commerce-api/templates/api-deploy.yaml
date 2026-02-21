@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: api
+      annotations:
+        rollme: {{ .Values.api.rollme | quote }}
     spec:
       containers: 
       - name: api-container

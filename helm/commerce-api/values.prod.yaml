@@ -1,6 +1,7 @@
 
 api:
   replicaCount: 1
+  rollme: "v1"
   image:
     repository: api-server
     pullPolicy: Never
