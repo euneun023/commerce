@@ -1,0 +1,16 @@
+
+api:
+  replicaCount: 2
+  rollme: "prod-v1"
+  pullPolicy: IfNotPresent
+mariadb:
+  auth:
+    database: commerce_real
+  primary:
+    persistence:
+      size: 5Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+

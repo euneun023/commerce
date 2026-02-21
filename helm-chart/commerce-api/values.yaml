@@ -3,7 +3,7 @@ api:
   replicaCount: 1
   rollme: "v1"
   image:
-    repository: api-server
+    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/api-server:latest
     pullPolicy: Always
 
   containerPort: 8080    
@@ -40,22 +40,18 @@ mariadb:
   architecture: standalone
 
   auth:
-    database: commerce_real
-    rootPassword: "admin12345"
+    database: commerce
+    rootPassword: "admin123"
 
   primary:
     persistence:
-      size: 5Gi
-    resources:
-      limits:
-        cpu: 1000m
-        memory: 2Gi
+      size: 1Gi
 
 ingress:
   enabled: true
   name: commerce-ingress
-  host: commerce.com
   path: / 
+  host: commerce.com
   pathType: Prefix
   
   backendServiceName: api-svc
