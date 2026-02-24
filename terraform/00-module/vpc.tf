@@ -1,6 +1,5 @@
 locals {
   name = "terraform-01-mod"
-  cluster_name = "eks-mod"
   azs = ["ap-northeast-2a", "ap-northeast-2c"]
 }
 

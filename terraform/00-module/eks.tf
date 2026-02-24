@@ -12,12 +12,22 @@ module "eks_mod" {
   vpc_id = module.vpc_mod.vpc_id
   subnet_ids = module.vpc_mod.private_subnets
 
+  # 공용 인터넷망 접속
   cluster_endpoint_public_access = true
+
+  enable_irsa = true
+  enable_cluster_creator_admin_permissions = true
+  authentication_mode = "API_AND_CONFIG_MAP"
 
   cluster_addons = {
     coredns = {}
     kube-proxy = {}
     vpc-cni = {}
+
+    aws-ebs-csi-driver = {
+      most_recent = true
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
+    }
   }
 
   eks_managed_node_groups = {
@@ -36,4 +46,36 @@ module "eks_mod" {
     project = "eks-mod"
   }
 }
+
+module "ebs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0"
+
+  role_name = "${local.cluster_name}-ebs-csi"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn = module.eks_mod.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
+module "lb_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0" 
+
+  role_name = "${local.cluster_name}-lb-controller"
+  attach_load_balancer_controller_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn = module.eks_mod.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+    }
+  }
+}
+
+
 
