@@ -1,10 +1,10 @@
 locals {
   name = "terraform-01-mod"
-  azs = ["ap-northeast-2a", "ap-northeast-2c"]
+  azs  = ["ap-northeast-2a", "ap-northeast-2c"]
 }
 
 module "vpc_mod" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
   name = local.name
@@ -20,12 +20,12 @@ module "vpc_mod" {
   enable_vpn_gateway = false
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/role/elb"                      = "1"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/role/internal-elb"             = "1"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }
 

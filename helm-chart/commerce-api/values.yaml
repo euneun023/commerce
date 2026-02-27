@@ -54,9 +54,12 @@ mariadb:
 
 ingress:
   enabled: true
+  className: "alb"
+  annotations: 
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
   name: commerce-ingress
   path: / 
-  host: commerce.com
   pathType: Prefix
   
   backendServiceName: api-svc
