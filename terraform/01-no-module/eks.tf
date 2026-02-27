@@ -40,11 +40,6 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOn
   role       = aws_iam_role.node.name
 }
 
-resource "aws_iam_role_policy_attachment" "node_AmazonEBSCSIDriverPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-  role       = aws_iam_role.node.name
-}
-
 resource "aws_eks_node_group" "main" {
   cluster_name = aws_eks_cluster.main.name
   node_group_name = "managed-nodes"
@@ -59,15 +54,63 @@ resource "aws_eks_node_group" "main" {
   instance_types = ["t3.small"]
 }
 
-# resource "aws_eks_addon" "ebs_csi" {
-#  cluster_name = aws_eks_cluster.main.name
-#  addon_name   = "aws-ebs-csi-driver"
-#  resolve_conflicts_on_create = "OVERWRITE"
-#  resolve_conflicts_on_update = "OVERWRITE"
-# }
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "aws-ebs-csi-driver"
+  service_account_role_arn = aws_iam_role.ebs_csi_irsa.arn
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [
+    aws_iam_openid_connect_provider.eks,
+    aws_iam_role_policy_attachment.ebs_csi_policy,
+    aws_eks_node_group.main
+  ]
+}
 
 resource "aws_iam_role_policy_attachment" "node_AmazonEKS_ALB_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
   role = aws_iam_role.node.name
+}
+
+#1. OIDC+IRSA Role추가
+# 1) OIDC Provider 생성 (클러스터 OIDC issuer 기반)
+# EKS OIDC issure의 인증서 thumbprint 추출
+data "tls_certificate" "eks_oidc" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+  client_id_list = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks_oidc.certificates[0].sha1_fingerprint]
+}
+
+# 2) EBS CSI controller용 IAM ROLE (IRSA) + 정책붙이기
+resource "aws_iam_role" "ebs_csi_irsa" {
+  name = "AmazonEKS_EBS_CSI_DriverRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.eks.arn
+      }
+      Condition = {
+        StringEquals = {
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+          "${replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_roe_policy_attachment" "ebs_csi_policy" {
+  role = aws_iam_role.ebs_csi_irsa.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 

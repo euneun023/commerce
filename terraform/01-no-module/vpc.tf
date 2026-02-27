@@ -127,3 +127,15 @@ resource "aws_route" "pvt_nat" {
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.nat.id
 }
+
+resource "aws_ecr_repository" "api_server" {
+  name = "api-server"
+  image_tag_mutability = "MUTABLE"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}

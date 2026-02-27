@@ -13,10 +13,12 @@ spec:
     metadata:
       labels:
         app: api
+      annotations:
+        rollme: {{ .Values.api.rollme | quote }}
     spec:
       containers: 
       - name: api-container
-        image: {{ .Values.api.image.repository }}
+        image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default "latest" }}"
         ports:
         - containerPort: {{ .Values.api.containerPort }}
         imagePullPolicy: {{ .Values.api.image.pullPolicy }}

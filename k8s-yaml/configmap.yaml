@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: api-config
-data:
-  SPRING_DATASOURCE_URL: "jdbc:mariadb://mariadb:3306/commerce"
-  SPRING_DATASOURCE_USERNAME: "root"

@@ -1,9 +1,11 @@
 
 api:
   replicaCount: 1
+  rollme: "v1"
   image:
-    repository: api-server
-    pullPolicy: Never
+    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/api-server
+    tag: latest
+    pullPolicy: Always
 
   containerPort: 8080    
 
@@ -35,36 +37,28 @@ api:
 
 #mariadb
 mariadb:
-  replicaCount: 1
-  enabled: true
+  fullnameOverride: "mariadb"
+  architecture: standalone
 
-  image:
-    repository: mariadb
-    tag: "10.6"
+  auth:
+    database: commerce
+    rootPassword: "admin123"
 
-  containerPort: 3306
-
-  env:
-    datasource:
-      database: commerce
-      rootPassword: admin123
-
-  persistence:
-    enabled: true
-    size: 1Gi
-    accessModes: 
-      - ReadWriteOnce
-
-  service:
-    name: mariadb
-    protocol: TCP
-    port: 3306
-    targetPort: 3306
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "gp3"
+      size: 1Gi
+      accessModes:
+        - ReadWriteOnce
 
 ingress:
   enabled: true
+  className: "alb"
+  annotations: 
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
   name: commerce-ingress
-  host: commerce.com
   path: / 
   pathType: Prefix
   
