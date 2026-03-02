@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - feature/health-db-v2
     paths-ignore:
       - "helm/values.dev.yaml"
 
@@ -47,13 +48,13 @@ jobs:
         | docker login --username AWS --password-stdin "$ECR_REGISTRY"
       - name: Build and Push Docker image
         run: |
-          IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORYL$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker build -t "$IMAGE_URI" .
           docker push "$IMAGE_URI"
 
       - name: Update Helm values image.tag
         run: |
-          sed -i -E "s|(^[[:space:]]*tag:[[:space:]]*).*$|\1\"IMAGE_TAG\"|g" "$VALUES_FILE"
+          sed -i -E "s|(^[[:space:]]*tag:[[:space:]]*).*$|\1\"$IMAGE_TAG\"|g" "$VALUES_FILE"
       - name: Commit and Push values file
         run: |
           git add "$VALUES_FILE"
