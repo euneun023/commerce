@@ -40,5 +40,11 @@ out/
 # Terraform 설정 및 바이너리 제외
 **/.terraform/
 *.tfstate
+*.tfstate*
 *.tfstate.backup
 **/.terraform/
+.terraform/
+
+# ci
+*.swp
+
