@@ -4,7 +4,7 @@ api:
   rollme: "v1"
   image:
     repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/api-server
-    tag: "34c4d37"
+    tag: "fbf3725"
     pullPolicy: Always
 
   containerPort: 8080    
