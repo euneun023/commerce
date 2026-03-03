@@ -6,7 +6,7 @@ on:
       - dev
       - feature/health-db-v2
     paths-ignore:
-      - "helm/values.dev.yaml"
+      - "helm-chart/commerce-api/values.yaml"
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
-  VALUES_FILE: helm/values.dev.yaml
+  VALUES_FILE: "helm-chart/commerce-api/values.yaml"
 
 jobs:
   build-push-and-update:
