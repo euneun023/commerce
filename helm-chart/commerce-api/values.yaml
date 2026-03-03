@@ -3,7 +3,7 @@ api:
   replicaCount: 1
   rollme: "v1"
   image:
-    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/api-server
+    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
     tag: "fbf3725"
     pullPolicy: Always
 
