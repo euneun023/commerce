@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: commerce
+  namespace: argocd
+spec:
+  project: default
+
+  source: https://github.com/euneun023/commerce.git
+  targetRevision: feature/health-db-v2
+  path: helm-chart/commerce-api
+
+  helm:
+    valueFiles:
+      - values.yaml
+      # - values.dev.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: commerce
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

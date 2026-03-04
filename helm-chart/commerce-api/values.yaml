@@ -1,0 +1,67 @@
+
+api:
+  replicaCount: 1
+  rollme: "v1"
+  image:
+    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
+    tag: "fbf3725"
+    pullPolicy: Always
+
+  containerPort: 8080    
+
+  env:
+    datasource:
+      host: mariadb
+      url: jdbc:mariadb://mariadb:3306/commerce
+      username: root
+      password: admin123
+      database: commerce
+      port: 3306
+
+  probes:
+    path: /healthz
+    port: 8080
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 5
+
+  service:
+    name: api-svc
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+#mariadb
+mariadb:
+  fullnameOverride: "mariadb"
+  architecture: standalone
+
+  auth:
+    database: commerce
+    rootPassword: "admin123"
+
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "gp3"
+      size: 1Gi
+      accessModes:
+        - ReadWriteOnce
+
+ingress:
+  enabled: true
+  className: "alb"
+  annotations: 
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  name: commerce-ingress
+  path: / 
+  pathType: Prefix
+  
+  backendServiceName: api-svc
+  backendServicePort: 8080  
+

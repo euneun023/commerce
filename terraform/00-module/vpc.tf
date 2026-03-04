@@ -1,0 +1,35 @@
+locals {
+  name = "terraform-01-mod"
+  azs  = ["ap-northeast-2a", "ap-northeast-2c"]
+}
+
+module "vpc_mod" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+
+  name = local.name
+  cidr = "10.10.0.0/16"
+
+  azs = local.azs
+
+  public_subnets  = ["10.10.1.0/24", "10.10.2.0/24"]
+  private_subnets = ["10.10.101.0/24", "10.10.102.0/24"]
+
+  enable_nat_gateway = true
+  single_nat_gateway = true
+  enable_vpn_gateway = false
+
+  public_subnet_tags = {
+    "kubernetes.io/role/elb"                      = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb"             = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+  }
+
+  tags = {
+    project = "eks-mod"
+  }
+}

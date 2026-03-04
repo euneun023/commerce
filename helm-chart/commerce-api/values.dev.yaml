@@ -1,0 +1,12 @@
+
+api:
+  replicaCount: 1
+  rollme: "dev-v1"
+mariadb:
+  auth:
+    database: commerce
+    rootPassword: "admin123"
+  primary:
+    persistence:
+      size: 2Gi
+
