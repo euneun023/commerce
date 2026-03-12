@@ -35,6 +35,20 @@ api:
     targetPort: 8080
     protocol: TCP
 
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 60
+
+
 #mariadb
 mariadb:
   fullnameOverride: "mariadb"
@@ -59,6 +73,7 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
   name: commerce-ingress
+  host: ""
   path: / 
   pathType: Prefix
   

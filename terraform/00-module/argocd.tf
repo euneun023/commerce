@@ -13,11 +13,11 @@ resource "helm_release" "argocd" {
   ]
   set = [
     {
-       name = "server.service.type"
-       value = "LoadBalancer"
+      name  = "server.service.type"
+      value = "ClusterIP"
     },
     {
-      name = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme"
+      name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme"
       value = "internet-facing"
     }
   ]
