@@ -16,4 +16,13 @@ spring:
         properties:
             hibernate:
               format-sql: true
-              dialect: org.hibernate.dialect.MariaDBDialect 
+              dialect: org.hibernate.dialect.MariaDBDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    health:
+      show-details: always 
