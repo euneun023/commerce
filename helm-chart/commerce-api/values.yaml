@@ -31,9 +31,10 @@ api:
   service:
     name: api-svc
     type: ClusterIP
-    port: 8080
-    targetPort: 8080
     protocol: TCP
+    port: 80
+    targetPort: 8080
+    metricsPort: 8080
 
   resources:
     requests:

@@ -25,7 +25,7 @@ sleep 180
 echo "[5] Check remaining Load Balancers"
 aws elbv2 describe-load-balancers \
   --region "$AWS_REGION" \
-  --query 'LoadBalancers[*].{Name:LoadBalancerName,VpcId:VpcId,State:State.Code}' \
+  --query "LoadBalancers[*].{Name:LoadBalancerName,VpcId:VpcId,State:State.Code}" \
   --output table || true
 
 echo "[6] Check remaining ENIs in VPC"

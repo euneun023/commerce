@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: commerce-api
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: commerce-api
+  namespaceSelector:
+    matchNames:
+      - commerce
+  endpoints:
+    - port: metrics
+      path: /actuator/prometheus
+      interval: 15s
+
