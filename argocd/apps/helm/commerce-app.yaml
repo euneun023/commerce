@@ -6,7 +6,8 @@ metadata:
 spec:
   project: default
 
-  source: https://github.com/euneun023/commerce.git
+  source: 
+    repoURL: https://github.com/euneun023/commerce.git
   targetRevision: feature/health-db-v2
   path: helm-chart/commerce-api
 
