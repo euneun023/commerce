@@ -48,3 +48,5 @@ out/
 # ci
 *.swp
 
+# db
+db_data

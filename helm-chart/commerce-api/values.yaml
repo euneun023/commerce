@@ -4,7 +4,7 @@ api:
   rollme: "v1"
   image:
     repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
-    tag: "fbf3725"
+    tag: "bd210de"
     pullPolicy: Always
 
   containerPort: 8080    
@@ -31,9 +31,24 @@ api:
   service:
     name: api-svc
     type: ClusterIP
-    port: 8080
-    targetPort: 8080
     protocol: TCP
+    port: 80
+    targetPort: 8080
+    metricsPort: 8080
+
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 60
+
 
 #mariadb
 mariadb:
@@ -59,6 +74,7 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
   name: commerce-ingress
+  host: ""
   path: / 
   pathType: Prefix
   

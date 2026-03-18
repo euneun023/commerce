@@ -4,7 +4,8 @@ spring:
 
     datasource:
         url: jdbc:mariadb://mariadb:3306/commerce
-      #url: jdbc:mariadb://commerce-mariadb:3306/commerce
+        #url: jdbc:mariadb://localhost:3306/commerce
+           #url: jdbc:mariadb://commerce-mariadb:3306/commerce
         username: root
         password: admin123
         driver-class-name: org.mariadb.jdbc.Driver
@@ -16,4 +17,13 @@ spring:
         properties:
             hibernate:
               format-sql: true
-              dialect: org.hibernate.dialect.MariaDBDialect 
+              dialect: org.hibernate.dialect.MariaDBDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    health:
+      show-details: always 

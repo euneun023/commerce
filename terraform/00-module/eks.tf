@@ -19,6 +19,10 @@ module "eks_mod" {
   enable_cluster_creator_admin_permissions = true
   authentication_mode                      = "API_AND_CONFIG_MAP"
 
+  node_security_group_tags = {
+    "karpenter.sh/discovery" = local.cluster_name
+  }
+
   cluster_addons = {
     coredns    = {}
     kube-proxy = {}
@@ -32,7 +36,7 @@ module "eks_mod" {
 
   eks_managed_node_groups = {
     default = {
-      instance_types = ["t3.small"]
+      instance_types = ["t3.medium"]
 
       desired_size = 2
       min_size     = 1
@@ -106,18 +110,63 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
-resource "kubernetes_storage_class" "gp3" {
+resource "kubernetes_storage_class_v1" "gp3" {
   metadata {
     name = "gp3"
   }
-  storage_provisioner = "ebs.csi.aws.com"
-  reclaim_policy = "Delete"
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
   allow_volume_expansion = true
-  volume_binding_mode = "WaitForFirstConsumer"
+  volume_binding_mode    = "WaitForFirstConsumer"
   parameters = {
     type = "gp3"
   }
   depends_on = [module.eks_mod]
-} 
+}
+
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  namespace  = "kube-system"
+  version    = "3.12.2"
+
+  wait    = true
+  timeout = 600
+
+  set = [
+    {
+      name  = "args[0]"
+      value = "--kubelet-insecure-tls"
+    },
+    {
+      name  = "args[1]"
+      value = "--kubelet-preferred-address-types=InternalIP\\,Hostname\\,ExternalIP"
+    }
+  ]
+  depends_on = [module.eks_mod]
+
+}
+
+resource "aws_security_group_rule" "eks_cluster_to_node_metrics_10251" {
+  type                     = "ingress"
+  from_port                = 10251
+  to_port                  = 10251
+  protocol                 = "tcp"
+  security_group_id        = module.eks_mod.node_security_group_id
+  source_security_group_id = module.eks_mod.cluster_primary_security_group_id
+  description              = "Allow EKS control plane to reach metrics-server on 10251"
+}
+
+resource "aws_security_group_rule" "node_to_node_metrics_10250" {
+  type                     = "ingress"
+  from_port                = 10250
+  to_port                  = 10250
+  protocol                 = "tcp"
+  security_group_id        = module.eks_mod.node_security_group_id
+  source_security_group_id = module.eks_mod.node_security_group_id
+  description              = "Allow node-to-node metrics scraping on 10250"
+
+}
 
 
