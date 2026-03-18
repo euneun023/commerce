@@ -9,6 +9,7 @@ metadata:
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
+  {{- if .Values.ingress.host }}
   - host: {{ .Values.ingress.host }}
     http:
       paths:
@@ -19,3 +20,15 @@ spec:
             name: {{ .Values.ingress.backendServiceName }}
             port:
               number: {{ .Values.ingress.backendServicePort }}
+  {{- else }}
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.path }}
+        pathType: {{ .Values.ingress.pathType }}
+        backend:
+          service:
+            name: {{ .Values.ingress.backendServiceName }}
+            port:
+              number: {{ .Values.ingress.backendServicePort }}
+    {{- end }}
