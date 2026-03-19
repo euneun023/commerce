@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.commerce.repository.ProductRepository;
 
+@Slf4j
 @Service
 public class DbCheckService {
 
@@ -21,6 +22,9 @@ public class DbCheckService {
     @Cacheable(value = "productCount")
     public long productCount() {
         long start = System.currentTimeMillis();
+
+        log.info("[redis - cache test] DB 조회 실행 - product count");
+
         long count = productRepository.count();
         long elapsed = System.currentTimeMillis() - start;
 
