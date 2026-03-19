@@ -12,12 +12,15 @@ spec:
     targetRevision: 80.13.2
     helm:
       values: |
+        crds:
+          enabled: true
         grafana:
           adminPassword: admin1234
           service:
             type: ClusterIP
 
         prometheus:
+          enabled: true
           service:
             type: ClusterIP
           prometheusSpec:
@@ -33,3 +36,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+      - ApplyOutOfSyncOnly=true

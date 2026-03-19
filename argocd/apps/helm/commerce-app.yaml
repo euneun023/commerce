@@ -8,17 +8,27 @@ spec:
 
   source: 
     repoURL: https://github.com/euneun023/commerce.git
-  targetRevision: feature/health-db-v2
-  path: helm-chart/commerce-api
+    targetRevision: feature/health-db-v2
+    path: helm-chart/commerce-api
 
-  helm:
-    valueFiles:
-      - values.yaml
+    helm:
+      valueFiles:
+        - values.yaml
       # - values.dev.yaml
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: commerce
 
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
