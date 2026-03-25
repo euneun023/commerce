@@ -5,7 +5,9 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
   sources:
     - repoURL: https://grafana.github.io/helm-charts
       chart: promtail
@@ -13,15 +15,9 @@ spec:
       helm:
         valueFiles:
           - $values/argocd/values/promtail-values.yaml
-
     - repoURL: https://github.com/euneun023/commerce.git
       targetRevision: feature/health-db-v2
       ref: values
-
-destination:
-  server: https://kubernetes.default.svc
-  namespace: logging
-
   syncPolicy:
     automated:
       prune: true

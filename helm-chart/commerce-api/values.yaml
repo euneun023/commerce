@@ -4,7 +4,11 @@ api:
   rollme: "v1"
   image:
     repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
+<<<<<<< HEAD
     tag: "ea9d480"
+=======
+    tag: "0822075"
+>>>>>>> 1453876 (chore: update image tag to 0822075 [skip ci])
     pullPolicy: Always
 
   containerPort: 8080    

@@ -38,6 +38,10 @@ alertmanager:
     receivers:
       - name: slack-default
         slack_configs:
-          - api_url: "https://hooks.slack.com/services/REPLACE/THIS/WITH_REAL"
+          - api_url: '$SLACK_WEBHOOK_URL'
             channel: "#alerts"
             send_resolved: true
+            title: "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}"
+            text: |
+              *summary*: {{ .CommonAnnotations.summary }}
+              *description*: {{ .CommonAnnotations.description }}
