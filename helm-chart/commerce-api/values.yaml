@@ -5,9 +5,9 @@ api:
   image:
     repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
 <<<<<<< HEAD
-    tag: "ea9d480"
+    tag: "19e417a"
 =======
-    tag: "0822075"
+    tag: "19e417a"
 >>>>>>> 1453876 (chore: update image tag to 0822075 [skip ci])
     pullPolicy: Always
 
