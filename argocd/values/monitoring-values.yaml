@@ -26,6 +26,10 @@ prometheus:
 
 alertmanager:
   enabled: true
+
+  alertmanagerSpec:
+    secrets:
+      - alertmanager-slack-webhook
   config:
     global:
       resolve_timeout: 5m
@@ -38,7 +42,7 @@ alertmanager:
     receivers:
       - name: slack-default
         slack_configs:
-          - api_url: '$SLACK_WEBHOOK_URL'
+          - api_url_file: /etc/alertmanager/secrets/alertmanager-slack-webhook/SLACK_WEBHOOK_URL
             channel: "#alerts"
             send_resolved: true
             title: "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}"
