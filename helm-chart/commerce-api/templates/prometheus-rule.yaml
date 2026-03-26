@@ -50,3 +50,13 @@ spec:
           annotations:
             summary: "Redis is down"
             description: "Redis 타겟 scrape가 실패했습니다."
+            
+        - alert: WatchdogTest
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: warning
+            service: test
+          annotations:
+            summary: "Test alert"
+            description: "Slack webhook test"
