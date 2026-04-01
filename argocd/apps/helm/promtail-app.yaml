@@ -1,33 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring
+  name: promtail
   namespace: argocd
 spec:
   project: default
-
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
-
+    namespace: logging
   sources:
-    - repoURL: https://prometheus-community.github.io/helm-charts
-      chart: kube-prometheus-stack
-      targetRevision: 80.13.2
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: promtail
+      targetRevision: 6.16.6
       helm:
         valueFiles:
-          - $values/argocd/values/monitoring-values.yaml
-
+          - $values/argocd/values/promtail-values.yaml
     - repoURL: https://github.com/euneun023/commerce.git
       targetRevision: feature/health-db-v2
       ref: values
-
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - SkipDryRunOnMissingResource=true
       - ApplyOutOfSyncOnly=true

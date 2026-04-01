@@ -3,8 +3,8 @@ api:
   replicaCount: 1
   rollme: "v1"
   image:
-    repository: 125773060303.dkr.ecr.ap-northeast-2.amazonaws.com/commerce/commerce
-    tag: "bd210de"
+    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
+    tag: "55dd826"
     pullPolicy: Always
 
   containerPort: 8080    
