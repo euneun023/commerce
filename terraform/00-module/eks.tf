@@ -7,7 +7,7 @@ module "eks_mod" {
   version = "~> 20.0"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.30"
+  cluster_version = "1.32"
 
   vpc_id     = module.vpc_mod.vpc_id
   subnet_ids = module.vpc_mod.private_subnets
@@ -47,12 +47,15 @@ module "eks_mod" {
   eks_managed_node_groups = {
     default = {
       instance_types = ["t3.small"]
-      ami_type       = "AL2_x86_64"
+      ami_type       = "AL2023_x86_64_STANDARD"
       capacity_type  = "SPOT"
 
+      iam_role_additional_policies = {
+        AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      }
 
       desired_size = 3
-      min_size     = 1
+      min_size     = 2
       max_size     = 5
 
       subnet_ids = module.vpc_mod.private_subnets
