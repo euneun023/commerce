@@ -3,8 +3,8 @@ api:
   replicaCount: 1
   rollme: "v1"
   image:
-    repository: 739961805636.dkr.ecr.ap-northeast-2.amazonaws.com/commerce-api
-    tag: "0822075"
+    repository: 125773060303.dkr.ecr.ap-northeast-2.amazonaws.com/commerce
+    tag: "c3e6321"
     pullPolicy: Always
 
   containerPort: 8080    
@@ -38,11 +38,11 @@ api:
 
   resources:
     requests:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: "100m"
+      memory: "160Mi"
     limits:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "384Mi"
   autoscaling:
     enabled: true
     minReplicas: 1
@@ -66,6 +66,13 @@ mariadb:
       size: 1Gi
       accessModes:
         - ReadWriteOnce
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 ingress:
   enabled: true

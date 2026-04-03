@@ -7,17 +7,18 @@ module "eks_mod" {
   version = "~> 20.0"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.29"
+  cluster_version = "1.31"
 
   vpc_id     = module.vpc_mod.vpc_id
   subnet_ids = module.vpc_mod.private_subnets
 
   # 공용 인터넷망 접속
   cluster_endpoint_public_access = true
-
+  cluster_endpoint_private_access = true
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
   authentication_mode                      = "API_AND_CONFIG_MAP"
+
 
   node_security_group_tags = {
     "karpenter.sh/discovery" = local.cluster_name
@@ -26,7 +27,16 @@ module "eks_mod" {
   cluster_addons = {
     coredns    = {}
     kube-proxy = {}
-    vpc-cni    = {}
+    vpc-cni    = {
+      most_recent = true
+      configuration_values = jsonencode({
+        env = {
+            ENABLE_PREFIX_DELEGATION = "true"
+	    WARM_PREFIX_TARGET = "1"
+          }
+      })
+
+    }
 
     aws-ebs-csi-driver = {
       most_recent              = true
@@ -36,11 +46,17 @@ module "eks_mod" {
 
   eks_managed_node_groups = {
     default = {
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.small"]
+      ami_type       = "AL2_x86_64"
+      capacity_type  = "SPOT"
 
-      desired_size = 2
-      min_size     = 1
-      max_size     = 3
+      iam_role_additional_policies = {
+        AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      }
+
+      desired_size = 4
+      min_size     = 2
+      max_size     = 5
 
       subnet_ids = module.vpc_mod.private_subnets
     }
