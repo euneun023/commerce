@@ -67,4 +67,4 @@ spec:
             severity: warning
           annotations:
             summary: "Slack send test"
-           description: "Alertmanager to Slack delivery test"
+            description: "Alertmanager to Slack delivery test"
