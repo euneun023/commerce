@@ -11,6 +11,13 @@ grafana:
       access: proxy
       url: http://loki-gateway.logging.svc.cluster.local
       isDefault: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
 
 prometheus:
   enabled: true
@@ -23,6 +30,13 @@ prometheus:
     ruleSelectorNilUsesHelmValues: false
     ruleSelector: {}
     ruleNamespaceSelector: {}
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 alertmanager:
   enabled: true
@@ -30,6 +44,13 @@ alertmanager:
   alertmanagerSpec:
     secrets:
       - alertmanager-slack-webhook
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
 
   config:
     global:

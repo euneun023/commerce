@@ -19,6 +19,14 @@ loki:
           prefix: loki_index_
           period: 24h
 
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu:300m
+      memory: 512Mi
+
 singleBinary:
   replicas: 1
   persistence:
