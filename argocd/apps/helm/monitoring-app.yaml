@@ -6,26 +6,21 @@ metadata:
 spec:
   project: default
 
-  source:
-    repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: 80.13.2
-    helm:
-      values: |
-        grafana:
-          adminPassword: admin1234
-          service:
-            type: ClusterIP
-
-        prometheus:
-          service:
-            type: ClusterIP
-          prometheusSpec:
-            serviceMonitorSelectorNilUsesHelmValues: false
-
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 80.13.2
+      helm:
+        valueFiles:
+          - $values/argocd/values/monitoring-values.yaml
+
+    - repoURL: https://github.com/euneun023/commerce.git
+      targetRevision: feature/health-db-v2
+      ref: values
 
   syncPolicy:
     automated:
@@ -33,3 +28,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
