@@ -68,3 +68,12 @@ spec:
           annotations:
             summary: "Slack send test"
             description: "Alertmanager to Slack delivery test"
+
+        - alert: SlackNowTest
+          expr: vector(1)
+          for: 10s
+          labels:
+            severity: warning
+          annotations:
+            summary: "Slack now test"
+            description: "Immediate Alertmanager delivery test"
