@@ -60,11 +60,11 @@ spec:
             summary: "Test alert"
             description: "Slack webhook test"
 
-         - alert: SlackSendTest
-           expr: vector(1)
-           for: 1m
-           labels:
-             severity: warning
-           annotations:
-             summary: "Slack send test"
-             description: "Alertmanager to Slack delivery test"
+        - alert: SlackSendTest
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Slack send test"
+           description: "Alertmanager to Slack delivery test"
