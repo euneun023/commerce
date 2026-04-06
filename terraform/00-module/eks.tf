@@ -45,9 +45,13 @@ module "eks_mod" {
   }
 
   eks_managed_node_groups = {
-    default = {
+    default-v2 = {
       instance_types = ["t3.small"]
       ami_type       = "AL2_x86_64"
+
+      bootstrap_extra_args = "--use-max-pods false --max-pods 110"
+      use_custom_launch_template = true
+
       capacity_type  = "SPOT"
 
       iam_role_additional_policies = {
@@ -56,7 +60,7 @@ module "eks_mod" {
 
       desired_size = 4
       min_size     = 2
-      max_size     = 5
+      max_size     = 8
 
       subnet_ids = module.vpc_mod.private_subnets
     }

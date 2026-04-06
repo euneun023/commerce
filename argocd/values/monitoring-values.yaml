@@ -66,3 +66,4 @@ alertmanager:
           - api_url_file: /etc/alertmanager/secrets/alertmanager-slack-webhook/SLACK_WEBHOOK_URL
             channel: '#alerts'
             send_resolved: true
+      - name: 'null'
