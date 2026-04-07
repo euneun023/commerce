@@ -45,18 +45,19 @@ module "eks_mod" {
   }
 
   eks_managed_node_groups = {
-    "default-v8" = {
+    "default-v9" = {
       instance_types = ["t3.medium"]
       ami_type       = "AL2_x86_64"
 
       #enable_bootstrap_user_data = true
 
-      pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1"
+      pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1\nexport USE_MAX_PODS=false\nexport KUBELET_EXTRA_ARGS=\"--max-pods=110\""
       
       #bootstrap_extra_args = "--use-max-pods false --kubelet-extra-args '--max-pods=110'"
 
       use_custom_launch_template = true
-      capacity_type  = "SPOT"
+      #capacity_type  = "SPOT"
+      capacity_type  = "ON_DEMAND"
       desired_size   = 2
       min_size       = 1
       max_size       = 3
