@@ -12,6 +12,23 @@ resource "helm_release" "argocd" {
   depends_on = [
     helm_release.aws_load_balancer_controller
   ]
+
+  values = [
+    <<-YAML
+    repoServer:
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+      env:
+        - name: ARGOCD_EXEC_TIMEOUT
+          value: 3m
+    YAML
+  ]
+
   set = [
     {
       name  = "server.service.type"

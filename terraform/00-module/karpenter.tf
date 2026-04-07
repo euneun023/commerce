@@ -14,7 +14,7 @@ resource "helm_release" "karpenter_crd" {
   wait    = true
   timeout = 600
 
-  depends_on = [module.eks_mod]
+  depends_on = [module.eks_mod, module.lb_role]
 }
 
 resource "helm_release" "karpenter" {
@@ -52,6 +52,8 @@ resource "helm_release" "karpenter" {
     module.eks_mod,
     helm_release.karpenter_crd,
     aws_iam_role_policy.karpenter_controller,
-    aws_sqs_queue.karpenter
+    aws_sqs_queue.karpenter,
+    module.lb_role,
+    helm_release.aws_load_balancer_controller
   ]
 }

@@ -45,22 +45,25 @@ module "eks_mod" {
   }
 
   eks_managed_node_groups = {
-    default-v2 = {
-      instance_types = ["t3.small"]
+    "default-v8" = {
+      instance_types = ["t3.medium"]
       ami_type       = "AL2_x86_64"
 
-      bootstrap_extra_args = "--use-max-pods false --max-pods 110"
-      use_custom_launch_template = true
+      #enable_bootstrap_user_data = true
 
+      pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1"
+      
+      #bootstrap_extra_args = "--use-max-pods false --kubelet-extra-args '--max-pods=110'"
+
+      use_custom_launch_template = true
       capacity_type  = "SPOT"
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 3
 
       iam_role_additional_policies = {
         AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
       }
-
-      desired_size = 4
-      min_size     = 2
-      max_size     = 8
 
       subnet_ids = module.vpc_mod.private_subnets
     }
@@ -128,6 +131,10 @@ resource "helm_release" "aws_load_balancer_controller" {
       value = module.lb_role.iam_role_arn
     }
   ]
+  depends_on = [
+    module.eks_mod,
+    module.lb_role
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "gp3" {
@@ -186,7 +193,4 @@ resource "aws_security_group_rule" "node_to_node_metrics_10250" {
   security_group_id        = module.eks_mod.node_security_group_id
   source_security_group_id = module.eks_mod.node_security_group_id
   description              = "Allow node-to-node metrics scraping on 10250"
-
 }
-
-
