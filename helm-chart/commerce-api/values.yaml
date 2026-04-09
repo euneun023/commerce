@@ -75,16 +75,20 @@ mariadb:
         memory: 512Mi
 
 ingress:
-  enabled: true
+  enabled: false
   className: "alb"
   annotations: 
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
+    #alb.ingress.kubernetes.io/scheme: internet-facing
+    #alb.ingress.kubernetes.io/target-type: ip
   name: commerce-ingress
-  host: ""
+  host: "commerce.dotory.site"
   path: / 
   pathType: Prefix
   
   backendServiceName: api-svc
   backendServicePort: 8080  
 
+  tls:
+    - hosts:
+        - commerce.dotory.site
+      secretName: commerce-dotory-site
