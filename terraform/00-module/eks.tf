@@ -29,13 +29,14 @@ module "eks_mod" {
     kube-proxy = {}
     vpc-cni    = {
       most_recent = true
+      before_compute = true
+
       configuration_values = jsonencode({
         env = {
             ENABLE_PREFIX_DELEGATION = "true"
 	    WARM_PREFIX_TARGET = "1"
           }
       })
-
     }
 
     aws-ebs-csi-driver = {
@@ -47,12 +48,29 @@ module "eks_mod" {
   eks_managed_node_groups = {
     "default-v9" = {
       instance_types = ["t3.medium"]
-      ami_type       = "AL2_x86_64"
+      ami_type       = "AL2023_x86_64_STANDARD"
+
+      cloudinit_pre_nodeadm = [
+        {
+          content_type = "application/node.eks.aws"
+          content = <<-EOT
+            ---
+            apiVersion: node.eks.aws/v1alpha1
+            kind: NodeConfig
+            spec:
+              kubelet:
+                config:
+                  maxPods: 110
+          EOT
+        }
+      ]
+
 
       #enable_bootstrap_user_data = true
 
-      pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1\nexport USE_MAX_PODS=false\nexport KUBELET_EXTRA_ARGS=\"--max-pods=110\""
+      #pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1\nexport USE_MAX_PODS=false\nexport KUBELET_EXTRA_ARGS=\"--max-pods=110\""
       
+      #pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1"
       #bootstrap_extra_args = "--use-max-pods false --kubelet-extra-args '--max-pods=110'"
 
       use_custom_launch_template = true
@@ -130,6 +148,14 @@ resource "helm_release" "aws_load_balancer_controller" {
     {
       name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
       value = module.lb_role.iam_role_arn
+    },
+    {
+      name  = "region"
+      value = "ap-northeast-2"
+    },
+    {
+      name  = "vpcId"
+      value = module.vpc_mod.vpc_id
     }
   ]
   depends_on = [

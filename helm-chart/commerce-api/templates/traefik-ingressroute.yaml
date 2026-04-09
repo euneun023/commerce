@@ -1,0 +1,40 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: commerce-web
+  namespace: commerce
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`commerce.dotory.site`)
+      kind: Rule
+      middlewares:
+        - name: redirect-https
+          namespace: commerce
+      services:
+        - name: api-svc
+          port: 8080
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: commerce-websecure
+  namespace: commerce
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`commerce.dotory.site`)
+      kind: Rule
+      middlewares:
+        - name: api-ratelimit
+          namespace: commerce
+            #- name: office-only
+            #namespace: commerce
+      services:
+        - name: api-svc
+          port: 8080
+  tls:
+    secretName: commerce-dotory-site-tls
+
