@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: commerce-dotory-site
+  namespace: commerce
+spec:
+  secretName: commerce-dotory-site
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  dnsNames:
+    - commerce.dotory.site
