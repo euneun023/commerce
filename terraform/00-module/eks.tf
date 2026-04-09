@@ -7,17 +7,18 @@ module "eks_mod" {
   version = "~> 20.0"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.29"
+  cluster_version = "1.31"
 
   vpc_id     = module.vpc_mod.vpc_id
   subnet_ids = module.vpc_mod.private_subnets
 
   # 공용 인터넷망 접속
   cluster_endpoint_public_access = true
-
+  cluster_endpoint_private_access = true
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
   authentication_mode                      = "API_AND_CONFIG_MAP"
+
 
   node_security_group_tags = {
     "karpenter.sh/discovery" = local.cluster_name
@@ -26,7 +27,17 @@ module "eks_mod" {
   cluster_addons = {
     coredns    = {}
     kube-proxy = {}
-    vpc-cni    = {}
+    vpc-cni    = {
+      most_recent = true
+      before_compute = true
+
+      configuration_values = jsonencode({
+        env = {
+            ENABLE_PREFIX_DELEGATION = "true"
+	    WARM_PREFIX_TARGET = "1"
+          }
+      })
+    }
 
     aws-ebs-csi-driver = {
       most_recent              = true
@@ -35,12 +46,43 @@ module "eks_mod" {
   }
 
   eks_managed_node_groups = {
-    default = {
+    "default-v9" = {
       instance_types = ["t3.medium"]
+      ami_type       = "AL2023_x86_64_STANDARD"
 
-      desired_size = 2
-      min_size     = 1
-      max_size     = 3
+      cloudinit_pre_nodeadm = [
+        {
+          content_type = "application/node.eks.aws"
+          content = <<-EOT
+            ---
+            apiVersion: node.eks.aws/v1alpha1
+            kind: NodeConfig
+            spec:
+              kubelet:
+                config:
+                  maxPods: 110
+          EOT
+        }
+      ]
+
+
+      #enable_bootstrap_user_data = true
+
+      #pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1\nexport USE_MAX_PODS=false\nexport KUBELET_EXTRA_ARGS=\"--max-pods=110\""
+      
+      #pre_bootstrap_user_data = "#!/bin/bash\nexport ENABLE_PREFIX_DELEGATION=true\nexport WARM_PREFIX_TARGET=1"
+      #bootstrap_extra_args = "--use-max-pods false --kubelet-extra-args '--max-pods=110'"
+
+      use_custom_launch_template = true
+      #capacity_type  = "SPOT"
+      capacity_type  = "ON_DEMAND"
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 3
+
+      iam_role_additional_policies = {
+        AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      }
 
       subnet_ids = module.vpc_mod.private_subnets
     }
@@ -106,7 +148,19 @@ resource "helm_release" "aws_load_balancer_controller" {
     {
       name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
       value = module.lb_role.iam_role_arn
+    },
+    {
+      name  = "region"
+      value = "ap-northeast-2"
+    },
+    {
+      name  = "vpcId"
+      value = module.vpc_mod.vpc_id
     }
+  ]
+  depends_on = [
+    module.eks_mod,
+    module.lb_role
   ]
 }
 
@@ -166,7 +220,4 @@ resource "aws_security_group_rule" "node_to_node_metrics_10250" {
   security_group_id        = module.eks_mod.node_security_group_id
   source_security_group_id = module.eks_mod.node_security_group_id
   description              = "Allow node-to-node metrics scraping on 10250"
-
 }
-
-

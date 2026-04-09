@@ -1,27 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring
+  name: redis
   namespace: argocd
 spec:
   project: default
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: monitoring
-
   sources:
-    - repoURL: https://prometheus-community.github.io/helm-charts
-      chart: kube-prometheus-stack
-      targetRevision: 80.13.2
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: redis
+      targetRevision: 19.6.4
       helm:
         valueFiles:
-          - $values/argocd/values/monitoring-values.yaml
-
+          - $values/argocd/values/redis-values.yaml
     - repoURL: https://github.com/euneun023/commerce.git
       targetRevision: feature/health-db-v2
       ref: values
 
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: commerce
+    
   syncPolicy:
     automated:
       prune: true
@@ -29,4 +27,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true
+

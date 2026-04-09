@@ -1,0 +1,29 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: commerce
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-ratelimit
+  namespace: commerce
+spec:
+  rateLimit:
+    average: 20
+    burst: 40
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: office-only
+  namespace: commerce
+spec:
+  ipAllowList:
+    sourceRange:
+      - "112.222.33.111/32"

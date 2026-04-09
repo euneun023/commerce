@@ -19,6 +19,17 @@ spring:
               format-sql: true
               dialect: org.hibernate.dialect.MariaDBDialect
 
+    cache:
+      type: redis
+      redis:
+        time-to-live: 60s
+        cache-null-values: false
+    data:
+      redis:
+        host: redis-master #실제서비스이름으로 변경예정 kubectl get svc -n commerce
+        port: 6379
+        password: redis1234
+
 management:
   endpoints:
     web:

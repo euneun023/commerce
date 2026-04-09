@@ -27,4 +27,13 @@ public class HealthController {
     public String statusCheck() {
         return "live";
     }
+    @GetMapping("/slow-test")
+    public String slowTest() throws InterruptedException {
+        Thread.sleep(3000);
+        return "Slow test completed";
+    }
+    @GetMapping("/error-test")
+    public String errorTest() {
+        throw new RuntimeException("Intentional test error");
+    }
 }
