@@ -26,4 +26,4 @@ metadata:
 spec:
   ipAllowList:
     sourceRange:
-      - "112.222.90.203/32"
+      - "112.222.33.111/32"

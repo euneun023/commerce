@@ -30,8 +30,8 @@ spec:
       middlewares:
         - name: api-ratelimit
           namespace: commerce
-        - name: office-only
-          namespace: commerce
+            #- name: office-only
+            #namespace: commerce
       services:
         - name: api-svc
           port: 80
