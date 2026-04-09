@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: commerce-dotory-site
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
     - commerce.dotory.site
