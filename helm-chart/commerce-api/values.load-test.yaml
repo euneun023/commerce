@@ -30,11 +30,11 @@ loadTest:
     path: /healthz
     port: 8080
     liveness:
-      initialDelaySeconds: 30
-      periodSeconds: 10
+      initialDelaySeconds: 120
+      periodSeconds: 20
     readiness:
-      initialDelaySeconds: 15
-      periodSeconds: 5
+      initialDelaySeconds: 90
+      periodSeconds: 10
 
   commonEnv:
     datasource:
