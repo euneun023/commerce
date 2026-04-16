@@ -1,3 +1,4 @@
+{{- if .Values.traefik.enabled }}
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -27,3 +28,4 @@ spec:
   ipAllowList:
     sourceRange:
       - "112.222.33.111/32"
+{{- end }}

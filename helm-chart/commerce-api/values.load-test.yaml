@@ -2,6 +2,22 @@ namespaceOverride: load-test
 
 api:
   enabled: false
+
+ingress:
+  enabled: false
+
+certificate:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+
+prometheusRule:
+  enabled: false
+
+traefik:
+  enabled: false
+
 loadTest:
   enabled: true
 
@@ -19,14 +35,12 @@ loadTest:
     readiness:
       initialDelaySeconds: 15
       periodSeconds: 5
+
   commonEnv:
     datasource:
-      host: mariadb
       url: jdbc:mariadb://mariadb:3306/commerce
       username: root
       password: admin123
-      database: commerce
-      port: 3306
     redis:
       host: redis-master
       port: 6379
