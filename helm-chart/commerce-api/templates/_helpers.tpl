@@ -63,5 +63,5 @@ Create the name of the service account to use
 
 {{- define "commerce-api.namespace" -}}
 {{- define .Release.Namespace .Values.namespaceOverride -}}
-{{- end -}}
+{{- end }}
 
