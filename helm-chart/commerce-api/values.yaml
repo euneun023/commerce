@@ -4,7 +4,7 @@ api:
   rollme: "v1"
   image:
     repository: 125773060303.dkr.ecr.ap-northeast-2.amazonaws.com/commerce
-    tag: "edb17fc"
+    tag: "5440e2a"
     pullPolicy: Always
 
   containerPort: 8080    
