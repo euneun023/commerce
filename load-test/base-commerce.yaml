@@ -1,19 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: protected-commerce
+  name: base-commerce
   namespace: load-test
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
-      app: protected-commerce
+      app: base-commerce
   template:
     metadata:
       labels:
-        app: protected-commerce
-      annotations:
-        karpenter.sh/do-not-disrupt: "true"
+        app: base-commerce
     spec:
       containers:
         - name: commerce
@@ -55,12 +53,32 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: protected-commerce
+  name: base-commerce
   namespace: load-test
 spec:
   selector:
-    app: protected-commerce
+    app: base-commerce
   ports:
     - name: http
       port: 80
       targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: base-commerce-hpa
+  namespace: load-test
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: base-commerce
+  minReplicas: 2
+  maxReplicas: 15
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

@@ -16,27 +16,27 @@ echo "[1-1] Force remove finalizers that often block deletion"
 kubectl patch svc traefik -n traefik -p '{"metadata":{"finalizers":[]}}' --type=merge || true
 kubectl patch ns traefik -p '{"spec":{"finalizers":[]}}' --type=merge || true
 
-for tgb in $(kubectl get targetgroupbinding -n traefik -o name 2>/dev/null); do
-  kubectl patch "$tgb" -n traefik -p '{"metadata":{"finalizers":[]}}' --type=merge || true
+for tgb in $(kubectl get targetgroupbinding -A -o name 2>/dev/null); do
+  kubectl patch "$tgb" -p '{"metadata":{"finalizers":[]}}' --type=merge || true
 done
 
-echo "[1-2] Delete traefik-specific resources (non-blocking)"
+echo "[1-2] Delete traefik-specific resources"
 kubectl delete svc traefik -n traefik --ignore-not-found=true --wait=false || true
-kubectl delete targetgroupbinding --all -n traefik --ignore-not-found=true --wait=false || true
+kubectl delete targetgroupbinding --all -A --ignore-not-found=true --wait=false || true
 kubectl delete ns traefik --ignore-not-found=true --wait=false || true
 
-echo "[2] Delete Karpenter resources (non-blocking)"
+echo "[2] Delete Karpenter resources"
 kubectl delete nodepool --all --ignore-not-found=true --wait=false || true
 kubectl delete ec2nodeclass --all --ignore-not-found=true --wait=false || true
 
-echo "[3] Uninstall Helm releases (non-blocking where possible)"
+echo "[3] Uninstall Helm releases"
 helm uninstall aws-load-balancer-controller -n kube-system --wait || true
 helm uninstall karpenter -n kube-system --wait || true
 helm uninstall argocd -n argocd --wait || true
 helm uninstall traefik -n traefik --wait || true
 helm uninstall cert-manager -n cert-manager --wait || true
 
-echo "[3-1] Waiting for AWS Load Balancers to be fully deleted..."
+echo "[3-1] Waiting for ELBv2 Load Balancers in VPC to disappear..."
 while true; do
   LB_ARNS=$(aws elbv2 describe-load-balancers \
     --region "$AWS_REGION" \
@@ -44,20 +44,46 @@ while true; do
     --output text 2>/dev/null || true)
 
   if [ -z "$LB_ARNS" ]; then
-    echo "All Load Balancers deleted successfully."
+    echo "All ELBv2 Load Balancers deleted."
     break
-  else
-    LB_COUNT=$(echo "$LB_ARNS" | wc -w)
-    echo "Still $LB_COUNT Load Balancer(s) remaining... checking again in 20s"
-    aws elbv2 describe-load-balancers \
-      --region "$AWS_REGION" \
-      --query "LoadBalancers[?VpcId=='$VPC_ID'].[LoadBalancerName,State.Code,DNSName]" \
-      --output table || true
-    sleep 20
   fi
+
+  aws elbv2 describe-load-balancers \
+    --region "$AWS_REGION" \
+    --query "LoadBalancers[?VpcId=='$VPC_ID'].[LoadBalancerName,State.Code,DNSName]" \
+    --output table || true
+  sleep 20
 done
 
-echo "[3-2] Cleaning up orphaned ENIs"
+echo "[3-2] Waiting for NAT Gateways in VPC to disappear..."
+while true; do
+  NAT_IDS=$(aws ec2 describe-nat-gateways \
+    --region "$AWS_REGION" \
+    --filter Name=vpc-id,Values="$VPC_ID" \
+    --query "NatGateways[?State!='deleted'].NatGatewayId" \
+    --output text 2>/dev/null || true)
+
+  if [ -z "$NAT_IDS" ]; then
+    echo "All NAT Gateways deleted."
+    break
+  fi
+
+  aws ec2 describe-nat-gateways \
+    --region "$AWS_REGION" \
+    --filter Name=vpc-id,Values="$VPC_ID" \
+    --query "NatGateways[?State!='deleted'].[NatGatewayId,State,SubnetId]" \
+    --output table || true
+  sleep 20
+done
+
+echo "[3-3] Check remaining network interfaces in VPC"
+aws ec2 describe-network-interfaces \
+  --region "$AWS_REGION" \
+  --filters Name=vpc-id,Values="$VPC_ID" \
+  --query 'NetworkInterfaces[*].{ENI:NetworkInterfaceId,Status:Status,Desc:Description,Subnet:SubnetId,PrivateIp:PrivateIpAddress,Attachment:Attachment.InstanceId}' \
+  --output table || true
+
+echo "[3-4] Delete orphaned AVAILABLE ENIs"
 ENI_IDS=$(aws ec2 describe-network-interfaces \
   --region "$AWS_REGION" \
   --filters Name=vpc-id,Values="$VPC_ID" Name=status,Values=available \
@@ -65,30 +91,48 @@ ENI_IDS=$(aws ec2 describe-network-interfaces \
   --output text 2>/dev/null || true)
 
 for ENI in $ENI_IDS; do
-  echo "Deleting available ENI: $ENI"
-  aws ec2 delete-network-interface --region "$AWS_REGION" --network-interface-id "$ENI" || true
+  echo "Deleting ENI: $ENI"
+  aws ec2 delete-network-interface \
+    --region "$AWS_REGION" \
+    --network-interface-id "$ENI" || true
 done
 
-echo "[4] Wait for AWS resources cleanup"
-sleep 60
-
-echo "[5] Check remaining Load Balancers"
-aws elbv2 describe-load-balancers \
+echo "[3-5] Check Elastic IPs still attached in VPC"
+aws ec2 describe-addresses \
   --region "$AWS_REGION" \
-  --query "LoadBalancers[*].{Name:LoadBalancerName,VpcId:VpcId,State:State.Code}" \
+  --query 'Addresses[*].{PublicIp:PublicIp,AllocationId:AllocationId,AssociationId:AssociationId,InstanceId:InstanceId,NetworkInterfaceId:NetworkInterfaceId}' \
   --output table || true
 
+echo "[4] Extra wait for AWS cleanup"
+sleep 90
+
+echo "[5] Final dependency check"
+echo "== LoadBalancers =="
 aws elbv2 describe-load-balancers \
   --region "$AWS_REGION" \
   --query "LoadBalancers[?VpcId=='$VPC_ID'].[LoadBalancerName,State.Code,DNSName]" \
   --output table || true
 
-echo "[6] Check remaining ENIs in VPC"
+echo "== NAT Gateways =="
+aws ec2 describe-nat-gateways \
+  --region "$AWS_REGION" \
+  --filter Name=vpc-id,Values="$VPC_ID" \
+  --query "NatGateways[?State!='deleted'].[NatGatewayId,State,SubnetId]" \
+  --output table || true
+
+echo "== ENIs =="
 aws ec2 describe-network-interfaces \
   --region "$AWS_REGION" \
   --filters Name=vpc-id,Values="$VPC_ID" \
-  --query 'NetworkInterfaces[*].{ENI:NetworkInterfaceId,Desc:Description,Status:Status,Subnet:SubnetId}' \
+  --query 'NetworkInterfaces[*].{ENI:NetworkInterfaceId,Status:Status,Desc:Description,Subnet:SubnetId}' \
   --output table || true
 
-echo "[7] Terraform destroy"
+echo "== Subnets =="
+aws ec2 describe-subnets \
+  --region "$AWS_REGION" \
+  --filters Name=vpc-id,Values="$VPC_ID" \
+  --query 'Subnets[*].{SubnetId:SubnetId,Cidr:CidrBlock,AZ:AvailabilityZone}' \
+  --output table || true
+
+echo "[6] Terraform destroy"
 terraform destroy -auto-approve

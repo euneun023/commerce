@@ -1,0 +1,92 @@
+{{- if .Values.loadTest.enabled }}
+{{- range $w := .Values.loadTest.workloads }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $w.name }}
+  namespace: {{ include "commerce-api.namespace" $ }}
+spec:
+  replicas: {{ $w.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $w.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $w.name }}
+      {{- if $w.doNotDisrupt }}
+      annotations:
+        karpenter.sh/do-not-disrupt: "true"
+      {{- end }}
+    spec:
+      containers:
+        - name: commerce
+          image: "{{ $.Values.loadTest.image.repository }}:{{ $.Values.loadTest.image.tag }}"
+          imagePullPolicy: {{ $.Values.loadTest.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ $.Values.loadTest.commonEnv.datasource.url | quote }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ $.Values.loadTest.commonEnv.datasource.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ $.Values.loadTest.commonEnv.datasource.password | quote }}
+            - name: SPRING_REDIS_HOST
+              value: {{ $.Values.loadTest.commonEnv.redis.host | quote }}
+            - name: SPRING_REDIS_PORT
+              value: {{ $.Values.loadTest.commonEnv.redis.port | quote }}
+            - name: SPRING_REDIS_PASSWORD
+              value: {{ $.Values.loadTest.commonEnv.redis.password | quote }}
+          resources:
+{{ toYaml $w.resources | indent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ $.Values.loadTest.probes.path }}
+              port: {{ $.Values.loadTest.probes.port }}
+            initialDelaySeconds: {{ $.Values.loadTest.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.loadTest.probes.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ $.Values.loadTest.probes.path }}
+              port: {{ $.Values.loadTest.probes.port }}
+            initialDelaySeconds: {{ $.Values.loadTest.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.loadTest.probes.liveness.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $w.name }}
+  namespace: {{ include "commerce-api.namespace" $ }}
+spec:
+  selector:
+    app: {{ $w.name }}
+  ports:
+    - name: http
+      port: {{ $w.service.port }}
+      targetPort: {{ $w.service.targetPort }}
+{{- if $w.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $w.name }}-hpa
+  namespace: {{ include "commerce-api.namespace" $ }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ $w.name }}
+  minReplicas: {{ $w.autoscaling.minReplicas }}
+  maxReplicas: {{ $w.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $w.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}
+{{- end }}
+{{- end }}

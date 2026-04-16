@@ -1,0 +1,17 @@
+{{- if .Values.loadTest.enabled }}
+{{- range $w := .Values.loadTest.workloads }}
+{{- if $w.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $w.name }}-pdb
+  namespace: {{ include "commerce-api.namespace" $ }}
+spec:
+  minAvailable: {{ $w.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app: {{ $w.name }}
+{{- end }}
+{{- end }}
+{{- end }}

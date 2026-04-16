@@ -1,0 +1,74 @@
+namespaceOverride: load-test
+
+api:
+  enabled: false
+loadTest:
+  enabled: true
+
+  image:
+    repository: 125773060303.dkr.ecr.ap-northeast-2.amazonaws.com/commerce
+    tag: "f58e713"
+    pullPolicy: Always
+
+  probes:
+    path: /healthz
+    port: 8080
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 5
+  commonEnv:
+    datasource:
+      host: mariadb
+      url: jdbc:mariadb://mariadb:3306/commerce
+      username: root
+      password: admin123
+      database: commerce
+      port: 3306
+    redis:
+      host: redis-master
+      port: 6379
+      password: redis1234
+
+  workloads:
+    - name: base-commerce
+      replicas: 2
+      service:
+        port: 80
+        targetPort: 8080
+      resources:
+        requests:
+          cpu: "300m"
+          memory: "512Mi"
+        limits:
+          cpu: "700m"
+          memory: "1Gi"
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 15
+        targetCPUUtilizationPercentage: 50
+      doNotDisrupt: false
+      pdb:
+        enabled: false
+
+    - name: protected-commerce
+      replicas: 3
+      service:
+        port: 80
+        targetPort: 8080
+      resources:
+        requests:
+          cpu: "300m"
+          memory: "512Mi"
+        limits:
+          cpu: "700m"
+          memory: "1Gi"
+      autoscaling:
+        enabled: false
+      doNotDisrupt: true
+      pdb:
+        enabled: true
+        minAvailable: 2
