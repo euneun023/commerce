@@ -29,12 +29,18 @@ loadTest:
   probes:
     path: /healthz
     port: 8080
-    liveness:
-      initialDelaySeconds: 120
-      periodSeconds: 20
     readiness:
-      initialDelaySeconds: 90
+      initialDelaySeconds: 110
       periodSeconds: 10
+    liveness:
+      initialDelaySeconds: 140
+      periodSeconds: 20
+    startupProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+      failureThreshold: 30
+      periodSeconds: 5
 
   commonEnv:
     datasource:
