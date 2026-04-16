@@ -1,4 +1,4 @@
-{{- if .Values.loadTest.enabled }}
+{{- if and .Values.loadTest .Values.loadTest.enabled }}
 {{- range $w := .Values.loadTest.workloads }}
 ---
 apiVersion: apps/v1
