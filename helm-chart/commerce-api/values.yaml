@@ -95,3 +95,17 @@ ingress:
 
 loadTest:
   enabled: false
+
+traefik:
+  enabled: true
+
+
+certificate:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+
+prometheusRule:
+  enabled: true
+
