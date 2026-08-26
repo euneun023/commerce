@@ -46,11 +46,8 @@ loadTest:
     datasource:
       url: jdbc:mariadb://mariadb:3306/commerce
       username: root
-      password: admin123
-    redis:
-      host: redis-master
-      port: 6379
-      password: redis1234
+      existingSecret: load-test-db-secret
+      existingSecretPasswordKey: mariadb-root-password
 
   workloads:
     - name: base-commerce
@@ -73,3 +70,7 @@ loadTest:
       doNotDisrupt: false
       pdb:
         enabled: false
+
+mariadb:
+  auth:
+    existingSecret: load-test-db-secret

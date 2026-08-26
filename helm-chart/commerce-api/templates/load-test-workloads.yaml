@@ -32,13 +32,10 @@ spec:
             - name: SPRING_DATASOURCE_USERNAME
               value: {{ $.Values.loadTest.commonEnv.datasource.username | quote }}
             - name: SPRING_DATASOURCE_PASSWORD
-              value: {{ $.Values.loadTest.commonEnv.datasource.password | quote }}
-            - name: SPRING_REDIS_HOST
-              value: {{ $.Values.loadTest.commonEnv.redis.host | quote }}
-            - name: SPRING_REDIS_PORT
-              value: {{ $.Values.loadTest.commonEnv.redis.port | quote }}
-            - name: SPRING_REDIS_PASSWORD
-              value: {{ $.Values.loadTest.commonEnv.redis.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.loadTest.commonEnv.datasource.existingSecret }}
+                  key: {{ $.Values.loadTest.commonEnv.datasource.existingSecretPasswordKey }}
           resources:
 {{ toYaml $w.resources | indent 12 }}
           readinessProbe:
