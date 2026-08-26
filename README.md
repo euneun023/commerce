@@ -78,6 +78,14 @@ kubectl create secret generic grafana-admin-secret \
 
 Kubernetes Secret은 namespace-scoped 리소스입니다. Spring Boot API와 Redis가 같은 `commerce` namespace에 있어, `commerce-redis-secret` 하나를 API와 Redis 양쪽에서 함께 참조합니다.
 
+> `commerce-load-test` Application을 함께 배포하는 경우, `load-test` namespace에 별도의 DB Secret이 필요합니다.
+
+```bash
+kubectl create secret generic load-test-db-secret \
+  --namespace load-test \
+  --from-literal=mariadb-root-password=<YOUR_PASSWORD_HERE>
+```
+
 ## 로컬 개발
 
 `docker-compose.yaml`은 MariaDB + Spring Boot API 컨테이너만 구성되어 있습니다(Redis는 포함되어 있지 않습니다).
@@ -133,7 +141,7 @@ Kubernetes Secret은 namespace-scoped 리소스입니다. Spring Boot API와 Red
    kubectl create namespace logging
    kubectl create namespace load-test
    ```
-3. [Secret 관리](#secret-관리)의 명령으로 Secret 3종 생성 (`commerce-db-secret`, `commerce-redis-secret` → `commerce`, `grafana-admin-secret` → `monitoring`)
+3. [Secret 관리](#secret-관리)의 명령으로 기본 Secret 3종과 load-test DB Secret 생성 (`commerce-db-secret`, `commerce-redis-secret` → `commerce`, `grafana-admin-secret` → `monitoring`, `load-test-db-secret` → `load-test`)
 4. `argocd/apps/helm/*.yaml`의 Application 6개 등록
    ```bash
    kubectl apply -f argocd/apps/helm/
