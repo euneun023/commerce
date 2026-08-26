@@ -109,8 +109,7 @@ kubectl create secret generic load-test-db-secret \
 │   ├── 00-module/           # 실제 사용 중인 IaC: VPC/EKS/Karpenter/ArgoCD/cert-manager/Traefik 모듈 구성
 │   └── 01-no-module/        # 모듈화 이전의 초기 버전(EKS/VPC를 모듈 없이 직접 정의)
 ├── helm-chart/
-│   ├── commerce-api/        # 애플리케이션 Helm 차트 (mariadb 서브차트 포함, values.yaml/values.dev.yaml/values.prod.yaml/values.load-test.yaml)
-│   └── monitoring/          # 모니터링용 values
+│   └── commerce-api/        # 애플리케이션 Helm 차트 (mariadb 서브차트 포함, values.yaml/values.dev.yaml/values.prod.yaml/values.load-test.yaml)
 ├── argocd/
 │   ├── apps/helm/           # ArgoCD Application 정의 (commerce, commerce-load-test, monitoring, loki, promtail, redis)
 │   └── values/              # 각 Application이 참조하는 Helm values
