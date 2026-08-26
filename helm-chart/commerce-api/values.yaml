@@ -14,9 +14,13 @@ api:
       host: mariadb
       url: jdbc:mariadb://mariadb:3306/commerce
       username: root
-      password: admin123
       database: commerce
       port: 3306
+      existingSecret: commerce-db-secret
+      existingSecretPasswordKey: mariadb-root-password
+    redis:
+      existingSecret: commerce-redis-secret
+      existingSecretPasswordKey: redis-password
 
   probes:
     path: /healthz
@@ -57,7 +61,7 @@ mariadb:
 
   auth:
     database: commerce
-    rootPassword: "admin123"
+    existingSecret: commerce-db-secret
 
   primary:
     persistence:

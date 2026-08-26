@@ -2,7 +2,10 @@ crds:
   enabled: true
 
 grafana:
-  adminPassword: admin1234
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
   service:
     type: ClusterIP
   additionalDataSources:

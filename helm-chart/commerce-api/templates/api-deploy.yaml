@@ -29,7 +29,15 @@ spec:
           - name: SPRING_DATASOURCE_USERNAME
             value: {{ .Values.api.env.datasource.username | quote }}
           - name: SPRING_DATASOURCE_PASSWORD
-            value: {{ .Values.api.env.datasource.password | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.api.env.datasource.existingSecret }}
+                key: {{ .Values.api.env.datasource.existingSecretPasswordKey }}
+          - name: SPRING_DATA_REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.api.env.redis.existingSecret }}
+                key: {{ .Values.api.env.redis.existingSecretPasswordKey }}
         resources:
           requests:
             cpu: {{ .Values.api.resources.requests.cpu }}

@@ -7,7 +7,7 @@ spring:
         #url: jdbc:mariadb://localhost:3306/commerce
            #url: jdbc:mariadb://commerce-mariadb:3306/commerce
         username: root
-        password: admin123
+        password: ${SPRING_DATASOURCE_PASSWORD}
         driver-class-name: org.mariadb.jdbc.Driver
 
     jpa:
@@ -28,7 +28,7 @@ spring:
       redis:
         host: redis-master #실제서비스이름으로 변경예정 kubectl get svc -n commerce
         port: 6379
-        password: redis1234
+        password: ${SPRING_DATA_REDIS_PASSWORD}
 
 management:
   endpoints:
