@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      - feature/health-db-v2
+      - main
     paths-ignore:
       - "helm-chart/commerce-api/values.yaml"
 

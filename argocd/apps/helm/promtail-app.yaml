@@ -16,7 +16,7 @@ spec:
         valueFiles:
           - $values/argocd/values/promtail-values.yaml
     - repoURL: https://github.com/euneun023/commerce.git
-      targetRevision: feature/health-db-v2
+      targetRevision: main
       ref: values
   syncPolicy:
     automated:

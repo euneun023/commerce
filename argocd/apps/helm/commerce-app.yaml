@@ -8,7 +8,7 @@ spec:
 
   source: 
     repoURL: https://github.com/euneun023/commerce.git
-    targetRevision: feature/health-db-v2
+    targetRevision: main
     path: helm-chart/commerce-api
 
     helm:
