@@ -7,7 +7,7 @@ services:
     ports:
       - "3306:3306"
     environment:	#환경변수, 자동생성
-      MYSQL_ROOT_PASSWORD: "2188"
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MYSQL_DATABASE: "commerce"
     volumes:		#(로컬:도커)
       - ./db_data:/var/lib/mysql
@@ -25,7 +25,7 @@ services:
     environment: 
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/commerce
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: "2188"
+      SPRING_DATASOURCE_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     depends_on:
       - mariadb
     networks:

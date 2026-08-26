@@ -44,9 +44,19 @@ out/
 *.tfstate.backup
 **/.terraform/
 .terraform/
+*.tfvars
 
 # ci
 *.swp
 
 # db
 db_data
+
+# 환경 변수
+.env
+.env.*
+!.env.example
+
+# 인증서 · 키
+*.pem
+*.key
